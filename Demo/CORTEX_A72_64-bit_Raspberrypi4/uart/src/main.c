@@ -35,7 +35,7 @@ void TaskA(void *pvParameters)
     for( ;; )
     {
 	    //uart_puts("a\r\n");
-		uart_puthex(gpio_pin_read());
+		uart_puthex(gpio_pin_read(GPIO_42));
 	    //uart_puts("Task A\r\n");
 		vTaskDelay(1000 / portTICK_RATE_MS);
     }
@@ -69,15 +69,14 @@ void interval_func(TimerHandle_t pxTimer)
 	(void) pxTimer;
 	uint8_t buf[2] = {0};
 	uint32_t len = 0;
-	static int first_time = 1;
 
 	len = uart_read_bytes(buf, sizeof(buf) - 1);
 	if (len>0){
 		uart_puts((char *)buf);
 		if(buf[0] == '1'){
-			gpio_pin_set(1);
+			gpio_pin_set(GPIO_42, GPIO_PIN_SET);
 		}else if (buf[0] == '0'){
-			gpio_pin_set(0);
+			gpio_pin_set(GPIO_42, GPIO_PIN_CLEAR);
 		}
 	}
 	
@@ -90,7 +89,7 @@ void main(void)
 	TaskHandle_t task_a;
 
 	uart_init();
-	gpio_pin_init();
+	gpio_pin_init(GPIO_42, OUT, GPIO_PIN_PULL_UP);
 	uart_puts("\r\n FreeRTOS over RPI4 - UART2 + LED\r\n");
 
 	xTaskCreate(TaskA, "Task A", 512, NULL, 0x10, &task_a);
