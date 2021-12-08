@@ -35,7 +35,7 @@ void TaskA(void *pvParameters)
     for( ;; )
     {
 	    //uart_puts("a\r\n");
-		uart_puthex(gpio_pin_read(GPIO_42));
+		uart_puthex(gpio_pin_read(GPIO_21));
 	    //uart_puts("Task A\r\n");
 		vTaskDelay(1000 / portTICK_RATE_MS);
     }
@@ -88,8 +88,23 @@ void main(void)
 {
 	TaskHandle_t task_a;
 
+	//uart2 initialization
 	uart_init();
+	//gpio2 isr enable
+	if ( gpio_isr_init() != 0){
+		uart_puts("\r\n gpio_isr_init error! \r\n");
+		while(1);
+	}
+	//LED on rasp
 	gpio_pin_init(GPIO_42, OUT, GPIO_PIN_PULL_UP);
+	//Button
+	gpio_pin_init(GPIO_21, IN, GPIO_PIN_PULL_NON);
+	//button interrupt enable
+	if(gpio_pin_isr_init(GPIO_21, GPAREN) != 0){
+		uart_puts("\r\n gpio__pin_isr_init error! \r\n");
+		while(1);
+	}
+
 	uart_puts("\r\n FreeRTOS over RPI4 - UART2 + LED\r\n");
 
 	xTaskCreate(TaskA, "Task A", 512, NULL, 0x10, &task_a);

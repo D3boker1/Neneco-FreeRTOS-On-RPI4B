@@ -1,3 +1,5 @@
+#ifndef _INTERRUPT_H_
+#define _INTERRUPT_H_
 #include <stdint.h>
 
 /* Functions */
@@ -11,3 +13,4 @@ typedef struct {
     INTERRUPT_HANDLER fn;
 } INTERRUPT_VECTOR;
 
+#endif //_INTERRUPT_H_

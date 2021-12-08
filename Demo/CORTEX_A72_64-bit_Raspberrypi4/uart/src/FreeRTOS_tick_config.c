@@ -1,7 +1,7 @@
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
-
+#include "gpio.h"
 #include "interrupt.h"
 #include "board.h"
 #include "uart.h"
@@ -106,6 +106,7 @@ void vApplicationIRQHandler( uint32_t ulICCIAR )
     if (!(InterruptHandlerFunctionTable[ulInterruptID].fn)) {
         return;
     }
+
     InterruptHandlerFunctionTable[ulInterruptID].fn();
 
 	return;

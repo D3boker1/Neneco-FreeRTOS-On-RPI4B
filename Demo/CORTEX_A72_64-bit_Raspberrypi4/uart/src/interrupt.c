@@ -36,12 +36,22 @@ int isr_register(uint32_t intno, uint32_t pri, uint32_t cpumask, void (*fn)(void
 	reg = (*addr) & ~(0xFFU << shift);
 	*addr = (reg | pri << shift);
     
-	/* GICD_ITARGETSRn (only for SPIs) */
+	/* GICD_ITARGETSRn (only for SPIs) 
+		This field stores the list of target processors for the interrupt. That is, it holds
+		the list of CPU interfaces to which the Distributor forwards the interrupt if it is asserted and
+		has sufficient priority.
+	*/
+	//For interrupt ID m, when DIV and MOD are the integer division and modulo operations:
 	if (intno >= 32U) {
+		//the corresponding GICD_ITARGETSRn number, n, is given by n = m DIV 4
    	   	n = intno / 4U;
+		//the offset of the required GICD_ITARGETSR is (0x800 + (4*n))	  
 		addr = (uint32_t *)(GICD_BASE + 0x800U + 4U * n);
-		shift = (intno % 4U) * 8U;
+		//the byte offset of the required Priority field in this register is m MOD 4
+		shift = (intno % 4U) * 8U; //8 symbolize 8 bits
+		// Get the value in GICD_ITARGETSR for interrupt m
 		reg = (*addr) & ~(0xFFU << shift);
+		// Specify the CPU in usage
 		*addr = (reg | cpumask << shift);
 	}
     asm volatile ("isb");
@@ -54,6 +64,10 @@ int isr_register(uint32_t intno, uint32_t pri, uint32_t cpumask, void (*fn)(void
 /*-----------------------------------------------------------*/
 
 /* EOI notification */
+/* 
+	end of interrupt.
+	 it has completed the processing of the specified interrupt
+*/
 void eoi_notify(uint32_t val)
 {
 	uint32_t *addr;

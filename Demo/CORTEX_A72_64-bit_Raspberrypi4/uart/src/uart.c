@@ -119,12 +119,14 @@ void uart_init(void)
     
     //Pega nos valores que estão em GPFSEL0
 	r = GPFSEL0;
-	//Limpa o FSEL0 (bit0) e o FSEL1 (bit1) que vão corresponder ao GPIO0 e GPIO1. O FSELX serve para selecionar o modo de operação. Ver pag 66. e os modos de opração estão na página 76
+	//Limpa o FSEL0 (bit0) e o FSEL1 (bit1) que vão corresponder ao GPIO0 e GPIO1. 
+	//O FSELX serve para selecionar o modo de operação. Ver pag 66. e os modos de opração estão na página 76
     r &= ~((0x7U << 3) | 0x7U); //7h -> 111b . 
     // O  3h simboliza o modo de operação escolhido. Neste caso o alt4 colocando o FSEL0 a 011 e o FSEL1 a 011.
 	r |= ((0x3U << 3) | 0x3U); /* ALT4 */
 	GPFSEL0 = r;
 
+	// GPIO0 e GPIO1 em configuração no pull resistor.
     r = GPIO_PUP_PDN_CNTRL_REG0;
 	r &= ~((0x3U << 2) | 0x3U);
 	GPIO_PUP_PDN_CNTRL_REG0 = r;

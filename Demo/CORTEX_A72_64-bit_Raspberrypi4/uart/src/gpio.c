@@ -1,6 +1,5 @@
 #include "gpio.h"
-
-#define LEV20 20
+#include "uart.h"
 
 volatile unsigned int* GPFSELx[]={  (volatile unsigned int *)(GPIO_BASE_REG + 0x00U),
                                     (volatile unsigned int *)(GPIO_BASE_REG + 0x04U),
@@ -8,11 +7,6 @@ volatile unsigned int* GPFSELx[]={  (volatile unsigned int *)(GPIO_BASE_REG + 0x
                                     (volatile unsigned int *)(GPIO_BASE_REG + 0x0cU),
                                     (volatile unsigned int *)(GPIO_BASE_REG + 0x10U),
                                     (volatile unsigned int *)(GPIO_BASE_REG + 0x14U)};
-
-volatile unsigned int* GPIO_PUP_PDN_CNTRL_REGx[]={  (volatile unsigned int *)(GPIO_BASE_REG + 0xe4U),
-                                                    (volatile unsigned int *)(GPIO_BASE_REG + 0xe8U),
-                                                    (volatile unsigned int *)(GPIO_BASE_REG + 0xecU),
-                                                    (volatile unsigned int *)(GPIO_BASE_REG + 0xf0U)};
 
 volatile unsigned int* GPSETx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x1cU),
                                     (volatile unsigned int *)(GPIO_BASE_REG + 0x20U)};
@@ -22,6 +16,34 @@ volatile unsigned int* GPCLRx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x
 
 volatile unsigned int* GPLEVx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x34U),
                                     (volatile unsigned int *)(GPIO_BASE_REG + 0x38U)};
+
+volatile unsigned int* GPEDSx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x40U),
+                                    (volatile unsigned int *)(GPIO_BASE_REG + 0x44U)};
+
+volatile unsigned int* GPRENx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x4cU),
+                                    (volatile unsigned int *)(GPIO_BASE_REG + 0x50U)};
+                    
+volatile unsigned int* GPFENx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x58U),
+                                    (volatile unsigned int *)(GPIO_BASE_REG + 0x5cU)};
+
+volatile unsigned int* GPHENx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x64U),
+                                    (volatile unsigned int *)(GPIO_BASE_REG + 0x68U)};
+
+volatile unsigned int* GPLENx[]={   (volatile unsigned int *)(GPIO_BASE_REG + 0x70U),
+                                    (volatile unsigned int *)(GPIO_BASE_REG + 0x74U)};
+
+volatile unsigned int* GPARENx[]={  (volatile unsigned int *)(GPIO_BASE_REG + 0x7cU),
+                                    (volatile unsigned int *)(GPIO_BASE_REG + 0x80U)};
+
+volatile unsigned int* GPAFENx[]={  (volatile unsigned int *)(GPIO_BASE_REG + 0x88U),
+                                    (volatile unsigned int *)(GPIO_BASE_REG + 0x8cU)};
+
+volatile unsigned int* GPIO_PUP_PDN_CNTRL_REGx[]={  (volatile unsigned int *)(GPIO_BASE_REG + 0xe4U),
+                                                    (volatile unsigned int *)(GPIO_BASE_REG + 0xe8U),
+                                                    (volatile unsigned int *)(GPIO_BASE_REG + 0xecU),
+                                                    (volatile unsigned int *)(GPIO_BASE_REG + 0xf0U)};
+
+
 
 int gpio_pin_init(GPIO_pin_t pin, GPIO_function_t pin_func, GPIO_PULLx_t pin_pull){
 
@@ -90,4 +112,93 @@ int gpio_pin_read(GPIO_pin_t pin){
 
     return ret;
 
+}
+
+int gpio_pin_isr_init(GPIO_pin_t pin, GPIO_event_t event_type){
+    uint8_t offset = 0;
+    uint8_t shift_value = pin;
+
+    if(pin >= 32){
+        offset = 1;
+        shift_value = pin - 32;
+    }
+
+    switch (event_type)
+    {
+        case GPREN:
+            *GPRENx[offset] = 0;
+            *GPRENx[offset] |= (1 << shift_value); 
+        break;
+
+        case GPFEN:
+            *GPFENx[offset] = 0;
+            *GPFENx[offset] |= (1 << shift_value); 
+        break;
+
+        case GPHEN:
+            *GPHENx[offset] = 0;
+            *GPHENx[offset] |= (1 << shift_value); 
+        break;
+
+        case GPLEN:
+            *GPLENx[offset] = 0;
+            *GPLENx[offset] |= (1 << shift_value); 
+        break;
+
+        case GPAREN:
+            *GPARENx[offset] = 0;
+            *GPARENx[offset] |= (1 << shift_value); 
+        break;
+
+        case GPAFEN:
+            *GPAFENx[offset] = 0;
+            *GPAFENx[offset] |= (1 << shift_value); 
+        break;
+
+        default:
+            return -1;
+        break;
+    }
+    return 0;
+
+}
+
+static void gpio_isr(void){
+    /*Test in pin 21.*/
+    /*uint8_t aux = 0;*/
+    static int first_time = 1;
+/*
+    aux = *GPLEVx[0];
+    aux = aux >> 21;
+    aux = aux & 0x01;
+    gpio_pin_set(GPIO_42, GPIO_PIN_SET);
+    if(aux == 1){
+*/
+    if((*GPEDSx[0] >> 21) & 0x01){
+        *GPEDSx[0] |= (1 << 21);
+    }
+	if(first_time == 1){
+		gpio_pin_set(GPIO_42, GPIO_PIN_SET);
+		first_time = 0;
+	}else if (first_time == 0){
+		gpio_pin_set(GPIO_42, GPIO_PIN_CLEAR);
+		first_time = 1;
+	}
+    //}*/
+    //gpio_pin_set(GPIO_42, GPIO_PIN_SET);
+
+  
+
+}
+
+/*
+    Alterar e tem de receber o porto gpio.
+    nos pinos trocar de GPIO_x para GPIO_PIN_x.
+*/
+int gpio_isr_init(void){
+
+    if ( isr_register(IRQ_GPIO0, GPIO_PRIORITY, (0x1U << 0x3U), gpio_isr) != 0)
+        return -1;
+
+    return 0;
 }
