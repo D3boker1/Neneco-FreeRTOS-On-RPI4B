@@ -163,6 +163,10 @@ int gpio_pin_isr_init(GPIO_pin_t pin, GPIO_event_t event_type){
 
 }
 
+/**
+ * @brief This function is the GPIO isr handler. This is a static function and as well is not acessible outside gpio module.
+ * 
+ */
 static void gpio_isr(void){
     /*Test in pin 21.*/
     /*uint8_t aux = 0;*/

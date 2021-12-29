@@ -38,14 +38,46 @@ typedef enum GPIO_pin{  GPIO_0=0, GPIO_1, GPIO_2, GPIO_3, GPIO_4, GPIO_5, GPIO_6
 */
 typedef enum GPIO_event{GPREN=0, GPFEN, GPHEN, GPLEN, GPAREN, GPAFEN}GPIO_event_t;
 
+/**
+ * @brief This function initialize a given pin with the specified parameters
+ * 
+ * @param pin: Pin to be initialized
+ * @param pin_func: Function that specified will perform
+ * @param pin_pull: Pull resistor option
+ * @return int: 0 in success
+ */
 int gpio_pin_init(GPIO_pin_t pin, GPIO_function_t pin_func, GPIO_PULLx_t pin_pull);
 
+/**
+ * @brief This function allow to set or reset a specific pin
+ * 
+ * @param pin: pin to be set or clear
+ * @param value: set or clear option
+ */
 void gpio_pin_set(GPIO_pin_t pin, GPIO_set_clear_t value);
 
+/**
+ * @brief Read the pin value at any given moment
+ * 
+ * @param pin: pin to read
+ * @return int: -1 Error; 0 if clear; 1 if set
+ */
 int gpio_pin_read(GPIO_pin_t pin);
 
+/**
+ * @brief Initialize a given pin to be a interruption. The interruption event is set accordingly to the event type
+ * 
+ * @param pin: Pin that will perform a interrupt
+ * @param event_type: Type of interrupt associated to the pin. 
+ * @return int 
+ */
 int gpio_pin_isr_init(GPIO_pin_t pin, GPIO_event_t event_type);
 
+/**
+ * @brief Register the GPIO interrupt into GIC-400 interrupt vector
+ * 
+ * @return int 
+ */
 int gpio_isr_init(void);
 
 #endif //_GPIO_H_
