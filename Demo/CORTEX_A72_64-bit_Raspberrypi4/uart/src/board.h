@@ -9,7 +9,7 @@
 /* The number of IRQs on BCM2711 */
 #define MAX_NUM_IRQS (224U)
 
-#define core_clock 500000 /**<  the core count frequency is 500 MHz*/
+#define core_clock 500000000 /**<  the core count frequency is 500 MHz*/
 
 /* IRQ number */
 #define VC_PERIPHERAL_IRQ 96

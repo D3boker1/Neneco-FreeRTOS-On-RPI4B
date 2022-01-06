@@ -66,6 +66,67 @@ void uart_puthex(uint64_t v)
 	for (int i = 60; i >= 0; i -= 4)
 		uart_putchar(hexdigits[(v >> i) & 0xf]);
 }
+
+void uart_putdec(int64_t num)
+{
+	int64_t a = num;
+    uint8_t b = 0;
+    uint8_t not_first_time = 0;
+	char send;
+    int i =0; 
+
+	if(a < 0){
+		a = a * -1;
+		uart_putchar('-');
+	}
+
+    while (i < 10)
+    {
+        i++;
+        b = a % 10;
+		switch (b)
+		{
+		case 0:
+			send = '0';
+			break;
+		case 1:
+			send = '1';
+			break;
+		case 2:
+			send = '2';
+			break;
+		case 3:
+			send = '3';
+			break;
+		case 4:
+			send = '4';
+			break;
+		case 5:
+			send = '5';
+			break;
+		case 6:
+			send = '6';
+			break;
+		case 7:
+			send = '7';
+			break;
+		case 8:
+			send = '8';
+			break;
+		case 9:
+			send = '9';
+			break;
+		default:
+			break;
+		}
+        if(b == 0 && a <= 0 && not_first_time)
+            return;
+		uart_putchar(send);
+        not_first_time = 1;
+        a = a / 10;   
+    }
+}
+
 /*-----------------------------------------------------------*/
 
 /*

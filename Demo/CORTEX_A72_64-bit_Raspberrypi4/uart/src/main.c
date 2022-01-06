@@ -26,6 +26,7 @@
 #include "gpio.h"
 #include "spi.h"
 #include "pwm.h"
+#include "AD1115.h"
 
 /*
  * Prototypes for the standard FreeRTOS callback/hook functions implemented
@@ -128,7 +129,7 @@ return (new_dt*1024)/100;
 }
 
 /**
- * @brief SPI test task
+ * @brief PWM test task
  * 
  * @param pvParameters 
  */
@@ -142,6 +143,38 @@ void TaskPWM(void *pvParameters){
 			dt=0;
 		dt += 10;
 
+		/**< Wait 500 ms*/
+		vTaskDelay(50 / portTICK_RATE_MS);
+    }
+
+	return; /* Never reach this line */
+
+}
+
+/**
+ * @brief I2C test task
+ * 
+ * @param pvParameters 
+ */
+void TaskI2C(void *pvParameters){
+	static uint8_t counter = 0;
+	(void) pvParameters;
+    for( ;; )
+    {
+		int16_t adc0;
+		int16_t volts0; 
+
+		adc0 = readADC_SingleEnded(0);
+		volts0 = computeVolts(adc0);
+
+		uart_puts("Sample number: ");
+		uart_putdec(counter);
+		uart_puts(": ");
+		uart_putdec(volts0);
+		uart_puts(";\r\n");
+
+		counter++;
+		
 		/**< Wait 500 ms*/
 		vTaskDelay(50 / portTICK_RATE_MS);
     }
@@ -265,15 +298,24 @@ void pwm_test(void){
 	xTaskCreate(TaskPWM, "Task PWM Test", 512, NULL, 0x10, &task_pwm_test);
 }
 
+TaskHandle_t task_i2c_test;
+void i2c_test(void){
+
+	//I2C init
+	init_i2c(0);
+	init_ADS1115();
+	xTaskCreate(TaskI2C, "Task I2C Test", 512, NULL, 0x10, &task_i2c_test);
+}
+
 void main(void)
 {
 	//TaskHandle_t task_a;
 	
 	
-	//uart_test();
+	uart_test();
 	//spi_test();
-	pwm_test();
-
+	//pwm_test();
+	i2c_test();
 
 	//xTaskCreate(TaskA, "Task A", 512, NULL, 0x10, &task_a);
 
