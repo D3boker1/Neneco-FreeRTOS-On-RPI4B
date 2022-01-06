@@ -16,7 +16,7 @@
 int isr_register(uint32_t intno, uint32_t pri, uint32_t cpumask, void (*fn)(void));
 
 /**
- * @brief Notigy the system that a given interrupt is done.
+ * @brief Notify the system that a given interrupt is done.
  * 
  * @param val 
  */

@@ -1,3 +1,20 @@
+
+/**
+ * @file uart.h
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2021-12-30
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
+#ifndef _UART_H_
+#define _UART_H_
+
+#include "gpio.h"
+
 #define UART_PRIORITY (0xA0)
 
 /**
@@ -36,3 +53,4 @@ uint32_t uart_read_bytes(uint8_t *buf, uint32_t length);
  */
 void uart_init(void);
 
+#endif // _UART_H_

@@ -30,7 +30,11 @@ OBJS +=build/interrupt.o
 OBJS +=build/main.o
 OBJS +=build/mmu_cfg.o
 OBJS +=build/uart.o
+OBJS +=build/spi.o
 OBJS +=build/gpio.o
+OBJS +=build/pwm.o
+OBJS +=build/gpioclock.o
+
 
 # From ../mmu
 OBJS +=build/mmu.o

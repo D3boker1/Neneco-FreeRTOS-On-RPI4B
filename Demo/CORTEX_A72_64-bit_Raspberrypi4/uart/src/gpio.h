@@ -27,7 +27,7 @@
 #define IRQ2_SET_EN_1 (*(volatile unsigned int *)(ARMC + 0x294))
 
 /**< Possible values for pin function. For ALT functionality see the bcm2711 datasheet page 77*/
-typedef enum GPIO_function{IN=0, OUT, ALT0, ALT1, ALT2, ALT3, ALT4, ALT5}GPIO_function_t;
+typedef enum GPIO_function{IN=0b000, OUT=0b001, ALT0=0b100, ALT1=0b101, ALT2=0b110, ALT3=0b111, ALT4=0b011, ALT5=0b010}GPIO_function_t;
 /**< Possible values for pull resistor*/
 typedef enum GPIO_PULLx{GPIO_PIN_PULL_NON=0, GPIO_PIN_PULL_UP, GPIO_PIN_PULL_DOWN}GPIO_PULLx_t;
 /**< Possible values for a pin: SET CLEAR*/

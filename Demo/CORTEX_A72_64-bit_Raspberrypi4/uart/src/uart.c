@@ -104,32 +104,19 @@ void uart_isr(void)
  * wait_linux()
  * This is a busy loop function to wait until Linux completes GIC initialization
  */
-static void wait_linux(void)
+/*static void wait_linux(void)
 {
 	wait_gic_init();
 	return;
-}
+}*/
 /*-----------------------------------------------------------*/
 
 void uart_init(void)
 {
-	uint32_t r;
 
     /* GPIO0 GPIO1 settings for UART2 */
-    
-    //Pega nos valores que estão em GPFSEL0
-	r = GPFSEL0;
-	//Limpa o FSEL0 (bit0) e o FSEL1 (bit1) que vão corresponder ao GPIO0 e GPIO1. 
-	//O FSELX serve para selecionar o modo de operação. Ver pag 66. e os modos de opração estão na página 76
-    r &= ~((0x7U << 3) | 0x7U); //7h -> 111b . 
-    // O  3h simboliza o modo de operação escolhido. Neste caso o alt4 colocando o FSEL0 a 011 e o FSEL1 a 011.
-	r |= ((0x3U << 3) | 0x3U); /* ALT4 */
-	GPFSEL0 = r;
-
-	// GPIO0 e GPIO1 em configuração no pull resistor.
-    r = GPIO_PUP_PDN_CNTRL_REG0;
-	r &= ~((0x3U << 2) | 0x3U);
-	GPIO_PUP_PDN_CNTRL_REG0 = r;
+    gpio_pin_init(GPIO_0, ALT4, GPIO_PIN_PULL_NON);
+    gpio_pin_init(GPIO_1, ALT4, GPIO_PIN_PULL_NON);
 
 	/* PL011 settings with assumption of 48MHz clock */
     UART_ICR  = 0x7FFU;         /* Clears an interrupt */
@@ -144,10 +131,10 @@ void uart_init(void)
 	uartctl->tx_mux = xSemaphoreCreateMutex();
 	uartctl->rx_queue = xQueueCreate(16, sizeof (uint8_t));
 
-#if defined(__LINUX__)
+/*#if defined(__LINUX__)
 	uart_puts("\r\nWaiting until Linux starts booting up ...\r\n");
 	wait_linux();
-#endif
+#endif*/
 
 	isr_register(IRQ_VC_UART, UART_PRIORITY, (0x1U << 0x3U), uart_isr);
     return;

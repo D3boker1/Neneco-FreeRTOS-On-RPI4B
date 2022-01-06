@@ -9,6 +9,8 @@
 /* The number of IRQs on BCM2711 */
 #define MAX_NUM_IRQS (224U)
 
+#define core_clock 500000 /**<  the core count frequency is 500 MHz*/
+
 /* IRQ number */
 #define VC_PERIPHERAL_IRQ 96
 #define IRQ_VTIMER (27)
@@ -16,6 +18,8 @@
 #define IRQ_GPIO1 (VC_PERIPHERAL_IRQ + 50)
 #define IRQ_GPIO2 (VC_PERIPHERAL_IRQ + 51)
 #define IRQ_GPIO3 (VC_PERIPHERAL_IRQ + 52)
+#define IRQ_SPI (VC_PERIPHERAL_IRQ + 54)
 #define IRQ_VC_UART (VC_PERIPHERAL_IRQ + 57) // 153 = 96(base das IRQ VC peripheral) + 57(offset da interrupção uart2)
+
 
 #endif //_BOARD_H_
