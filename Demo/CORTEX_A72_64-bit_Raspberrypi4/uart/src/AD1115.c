@@ -1,4 +1,14 @@
-
+/**
+ * @file AD1115.c
+ * @author Francisco Marques (fmarques_00@protonmail.com)
+ * @brief This module implements an abstraction layer to work with ADS1115 Device in RPI4.
+ * @version 0.1
+ * @date 2022-01-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * Based on work of Kevin "KTOWN" Townsend
+ */
 #include "AD1115.h"
 
 uint8_t m_bitShift;            ///< bit shift amount
@@ -79,7 +89,7 @@ uint8_t conversionComplete() {
 }
 
 
-int16_t readADC_SingleEnded(uint8_t channel) {
+int16_t readADC_SingleEnded(ADS1115_CHANNELS_t channel) {
   if (channel > 3) {
     return 0;
   }

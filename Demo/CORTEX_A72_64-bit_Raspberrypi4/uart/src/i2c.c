@@ -1,12 +1,13 @@
 /**
  * @file i2c.c
- * @author your name (you@domain.com)
- * @brief 
+ * @author Francisco Marques (fmarques_00@protonmail.com)
+ * @brief Implementation of i2c master module.
  * @version 0.1
  * @date 2022-01-06
  * 
  * @copyright Copyright (c) 2022
  * 
+ * Based on work of R. Stange <rsta2@o2online.de>
  */
 
 #include "i2c.h"
@@ -63,25 +64,35 @@
 
 #define I2C_DEVICE_1 ARM_IO_BASE + 0x804000
 
-/// \brief Write 32-bit value to MMIO address
+/**
+ * @brief Write 32-bit value to MMIO address
+ * 
+ * @param nAddress 
+ * @param nValue 
+ */
 static inline void write32 (unsigned long nAddress, uint32_t nValue)
 {
 	*(uint32_t volatile *) nAddress = nValue;
 }
 
-/// \brief Read 32-bit value from MMIO address
+/**
+ * @brief Read 32-bit value from MMIO address
+ * 
+ * @param nAddress 
+ * @return uint32_t 
+ */
 static inline uint32_t read32 (unsigned long nAddress)
 {
 	return *(uint32_t volatile *) nAddress;
 }
 
-uint8_t init_i2c (uint8_t bFastMode){
+uint8_t init_i2c (fastMode_t bFastMode){
 
     /**< Initialize the I2C device 1*/
     gpio_pin_init(GPIO_2, ALT0, GPIO_PIN_PULL_NON);
     gpio_pin_init(GPIO_3, ALT0, GPIO_PIN_PULL_NON);
 
-    if(bFastMode == 1){
+    if(bFastMode == FAST_MODE_400K){
         set_clock_i2c(400000);
     }
     else{
@@ -100,12 +111,12 @@ void set_clock_i2c (unsigned nClockSpeed){
 int read_i2c(uint8_t ucAddress, void *pBuffer, unsigned nCount){
 	if (ucAddress >= 0x80)
 	{
-		return -1;
+		return -ENOSYS;
 	}
 
 	if (nCount == 0)
 	{
-		return -1;
+		return -ENOSYS;
 	}
 
 	uint8_t *pData = (uint8_t *) pBuffer;
@@ -149,15 +160,15 @@ int read_i2c(uint8_t ucAddress, void *pBuffer, unsigned nCount){
 	{
 		write32 (I2C_DEVICE_1 + ARM_BSC_S__OFFSET, S_ERR);
 
-		nResult = -1;
+		nResult = -ENOMSG;
 	}
 	else if (nStatus & S_CLKT)
 	{
-		nResult = -1;
+		nResult = -ENOMSG;
 	}
 	else if (nCount > 0)
 	{
-		nResult = -1;
+		nResult = -ENOMSG;
 	}
 
 	write32 (I2C_DEVICE_1 + ARM_BSC_S__OFFSET, S_DONE);
@@ -168,12 +179,12 @@ int read_i2c(uint8_t ucAddress, void *pBuffer, unsigned nCount){
 int write_i2c(uint8_t ucAddress, const void *pBuffer, unsigned nCount){
 if (ucAddress >= 0x80)
 	{
-		return -1;
+		return -ENOSYS;
 	}
 
 	if (nCount != 0 && pBuffer == 0)
 	{
-		return -1;
+		return -ENOSYS;
 	}
 
 	uint8_t *pData = (uint8_t *) pBuffer;
@@ -219,15 +230,15 @@ if (ucAddress >= 0x80)
 	{
 		write32 (I2C_DEVICE_1 + ARM_BSC_S__OFFSET, S_ERR);
 
-		nResult = -1;
+		nResult = -ENOMSG;
 	}
 	else if (nStatus & S_CLKT)
 	{
-		nResult = -1;
+		nResult = -ENOMSG;
 	}
 	else if (nCount > 0)
 	{
-		nResult = -1;
+		nResult = -ENOMSG;
 	}
 
 	write32 (I2C_DEVICE_1 + ARM_BSC_S__OFFSET, S_DONE);

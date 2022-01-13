@@ -168,31 +168,13 @@ int gpio_pin_isr_init(GPIO_pin_t pin, GPIO_event_t event_type){
  * 
  */
 static void gpio_isr(void){
-    /*Test in pin 21.*/
-    /*uint8_t aux = 0;*/
-    static int first_time = 1;
-/*
-    aux = *GPLEVx[0];
-    aux = aux >> 21;
-    aux = aux & 0x01;
-    gpio_pin_set(GPIO_42, GPIO_PIN_SET);
-    if(aux == 1){
-*/
+
+    /**<Test in pin 21.*/
+
     if((*GPEDSx[0] >> 21) & 0x01){
         *GPEDSx[0] |= (1 << 21);
+        encoder_counter++;
     }
-	if(first_time == 1){
-		gpio_pin_set(GPIO_42, GPIO_PIN_SET);
-		first_time = 0;
-	}else if (first_time == 0){
-		gpio_pin_set(GPIO_42, GPIO_PIN_CLEAR);
-		first_time = 1;
-	}
-    //}*/
-    //gpio_pin_set(GPIO_42, GPIO_PIN_SET);
-
-  
-
 }
 
 /*
@@ -200,7 +182,6 @@ static void gpio_isr(void){
     nos pinos trocar de GPIO_x para GPIO_PIN_x.
 */
 int gpio_isr_init(void){
-
     if ( isr_register(IRQ_GPIO0, GPIO_PRIORITY, (0x1U << 0x3U), gpio_isr) != 0)
         return -1;
 

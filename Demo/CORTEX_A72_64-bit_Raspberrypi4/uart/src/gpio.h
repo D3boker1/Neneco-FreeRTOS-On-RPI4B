@@ -17,6 +17,8 @@
 #include "board.h"
 #include "interrupt.h"
 
+int encoder_counter;
+
 /**< GPIO base registor*/
 #define GPIO_BASE_REG 0xFE200000U
 /**< GPIO interrupt priority*/

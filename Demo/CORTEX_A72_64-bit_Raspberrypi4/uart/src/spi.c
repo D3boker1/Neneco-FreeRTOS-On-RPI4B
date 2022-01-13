@@ -1,7 +1,7 @@
 /**
  * @file spi.c
- * @author your name (you@domain.com)
- * @brief 
+ * @author Francisco Marques (fmarques_00@protonmail.com)
+ * @brief This module allow the programme to use the spi device 0 on RPI.
  * @version 0.1
  * @date 2021-12-29
  * 

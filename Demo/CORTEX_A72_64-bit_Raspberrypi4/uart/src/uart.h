@@ -24,7 +24,7 @@
  */
 void uart_putchar(uint8_t c);
 
-void uart_putdec(int64_t num);
+void uart_putdec(float num);
 
 /**
  * @brief Write a string.

@@ -1,4 +1,14 @@
-
+/**
+ * @file AD1115.h
+ * @author Francisco Marques (fmarques_00@protonmail.com)
+ * @brief This module implements an abstraction layer to work with ADS1115 Device in RPI4.
+ * @version 0.1
+ * @date 2022-01-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * Based on work of Kevin "KTOWN" Townsend
+ */
 #ifndef _AD7705_H_
 #define _AD7705_H_
 
@@ -102,6 +112,13 @@ typedef enum {
   GAIN_SIXTEEN = ADS1X15_REG_CONFIG_PGA_0_256V
 } adsGain_t;
 
+typedef enum {
+  ADS1115_CHANNEL_0 = 0,
+  ADS1115_CHANNEL_1,
+  ADS1115_CHANNEL_2,
+  ADS1115_CHANNEL_3
+} ADS1115_CHANNELS_t;
+
 /** Data rates */
 #define RATE_ADS1115_8SPS (0x0000)   ///< 8 samples per second
 #define RATE_ADS1115_16SPS (0x0020)  ///< 16 samples per second
@@ -112,11 +129,26 @@ typedef enum {
 #define RATE_ADS1115_475SPS (0x00C0) ///< 475 samples per second
 #define RATE_ADS1115_860SPS (0x00E0) ///< 860 samples per second
 
+/**
+ * @brief read a value from one specific channel on ADS1115 device
+ * 
+ * @param channel 
+ * @return int16_t 
+ */
+int16_t readADC_SingleEnded(ADS1115_CHANNELS_t channel);
 
-int16_t readADC_SingleEnded(uint8_t channel);
-
+/**
+ * @brief Initialize the ADS1115 Device
+ * 
+ */
 void init_ADS1115(void);
 
+/**
+ * @brief Converts the received value into a voltage meaning
+ * 
+ * @param counts 
+ * @return float 
+ */
 float computeVolts(int16_t counts);
 
 #endif //_AD7705_H_

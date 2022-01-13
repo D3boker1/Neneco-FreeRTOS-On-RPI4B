@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @author your name (you@domain.com)
+ * @author Francisco Marques (fmarques_00@protonmail.com)
  * @brief 
  * @version 0.1
  * @date 2021-12-30
@@ -27,6 +27,7 @@
 #include "spi.h"
 #include "pwm.h"
 #include "AD1115.h"
+#include "LN298.h"
 
 /*
  * Prototypes for the standard FreeRTOS callback/hook functions implemented
@@ -50,26 +51,6 @@ static inline void io_halt(void)
  * 
  * @param pvParameters 
  */
-/*void TaskA(void *pvParameters)
-{
-	(void) pvParameters;
-
-    for( ;; )
-    {
-	    //uart_puts("a\r\n");
-		uart_puthex(gpio_pin_read(GPIO_21));
-	    //uart_puts("Task A\r\n");
-		vTaskDelay(1000 / portTICK_RATE_MS);
-    }
-
-	return; // Never reach this line 
-}*/
-
-/**
- * @brief UART test task
- * 
- * @param pvParameters 
- */
 void TaskUART(void *pvParameters){
 	(void) pvParameters;
 
@@ -77,20 +58,11 @@ void TaskUART(void *pvParameters){
     {
 		uart_puts("UART2 Working!\r\n");
 
-
 		/**< Wait 1000 ms*/
 		vTaskDelay(1000 / portTICK_RATE_MS);
     }
 
 	return; /* Never reach this line */
-}
-
-void ad7705_channel1_setup(void){
-	spi_send_data_poll(0b00100000);
-	spi_send_data_poll(0b00001100);
-	spi_send_data_poll(0b00010000);
-	spi_send_data_poll(0b01000000);
-	spi_send_data_poll(0b00111000);
 }
 
 
@@ -106,7 +78,7 @@ void TaskSPI(void *pvParameters){
     for( ;; )
     {
 		rcv_data = -ENODATA;
-		ad7705_channel1_setup();
+		spi_send_data_poll(0b00010000);
 		rcv_data = spi_receive_data_poll();
 		if ( rcv_data != -ENODATA ){
 			uart_puts("Channel1:\r\n");
@@ -143,8 +115,36 @@ void TaskPWM(void *pvParameters){
 			dt=0;
 		dt += 10;
 
-		/**< Wait 500 ms*/
+		/**< Wait 50 ms*/
 		vTaskDelay(50 / portTICK_RATE_MS);
+    }
+
+	return; /* Never reach this line */
+
+}
+
+/**
+ * @brief 
+ * 
+ * @param pvParameters 
+ */
+void TaskLN298 (void *pvParameters){
+	LN298_DIR_t direction[3]={STOP, LEFT, RIGHT};
+	uint8_t i = 0;
+	(void) pvParameters;
+    for( ;; )
+    {
+		for(i = 0; i < 3; i++){
+			ln298_set_dir(direction[i]);
+			for (size_t d = 0; d <= 100; d+=10)
+			{
+				ln298_set_velocity_per(d);
+				vTaskDelay(50 / portTICK_RATE_MS);
+			}
+		}
+		
+		/**< Wait 50 ms*/
+		vTaskDelay(100 / portTICK_RATE_MS);
     }
 
 	return; /* Never reach this line */
@@ -183,19 +183,49 @@ void TaskI2C(void *pvParameters){
 
 }
 
+/**
+ * @brief GPIO test task
+ * 
+ * @param pvParameters 
+ */
+void TaskGPIO(void *pvParameters){
+	(void) pvParameters;
+    for( ;; )
+    {
+		uart_puts("encoder value: ");
+		uart_putdec(encoder_counter);
+		uart_puts(";\r\n");
+		vTaskDelay(50 / portTICK_RATE_MS);
+    }
+
+	return; /* Never reach this line */
+
+}
+
 /*-----------------------------------------------------------*/
 
 /*Test 1 - Turn on and turn off the LED in 1 sec intervals*/
 /*void interval_func(TimerHandle_t pxTimer)
 {
-	static int first_time = 1;
+	static integrator = 0;
 
-		if(first_time == 1){
-			gpio_pin_set(1);
-			first_time = 0;
-		}else if (first_time == 0){
-			gpio_pin_set(0);
-			first_time = 1;
+		if(gpio_pin_read(GPIO_21) == 0){
+			if(integrator > 0){
+				integrator--;
+			}
+		}else{
+			if(integrator < MAXIMUM){
+				integrator++;
+			}
+		}
+
+		if(integrator == 0){
+			virt_GPIO_21 = 0;
+			encoder_counter--;
+		}else if(integrator >= MAXIMUM){
+			virt_GPIO_21 = 1;
+			encoder_counter++;
+			integrator = MAXIMUM;
 		}
 }*/
 
@@ -234,6 +264,7 @@ void TaskI2C(void *pvParameters){
  * The input pin has the interrupt enable with the event GPIO Pin Async. Rising Edge Detect
  * Every time that a rising edge is detected the LED is toggle.
  */
+TaskHandle_t task_gpio_test;
 void gpio_test(void){
 	//gpio0 isr enable
 	if ( gpio_isr_init() != 0){
@@ -244,8 +275,9 @@ void gpio_test(void){
 	gpio_pin_init(GPIO_42, OUT, GPIO_PIN_PULL_UP);
 	//Button
     gpio_pin_init(GPIO_21, IN, GPIO_PIN_PULL_NON);
+	xTaskCreate(TaskGPIO, "Task GPIO Test", 512, NULL, 0x10, &task_gpio_test);
 	//button interrupt enable
-	if(gpio_pin_isr_init(GPIO_21, GPAREN) != 0){
+	if(gpio_pin_isr_init(GPIO_21, GPHEN) != 0){
 		uart_puts("\r\n gpio__pin_isr_init error! \r\n");
 		while(1);
 	}
@@ -260,7 +292,7 @@ void gpio_test(void){
  * before the scheduler init.
  * 
  */
-//TaskHandle_t task_uart_test;
+TaskHandle_t task_uart_test;
 void uart_test(){
 	//uart2 initialization
 	uart_init();
@@ -293,7 +325,6 @@ TaskHandle_t task_pwm_test;
 void pwm_test(void){
 
 	//PWM init
-	//gpio_pin_init(GPIO_42, OUT, GPIO_PIN_PULL_UP);
 	pwm_init(PWM0, PWM_CHANNEL_1, 1024, dt);
 	xTaskCreate(TaskPWM, "Task PWM Test", 512, NULL, 0x10, &task_pwm_test);
 }
@@ -307,19 +338,31 @@ void i2c_test(void){
 	xTaskCreate(TaskI2C, "Task I2C Test", 512, NULL, 0x10, &task_i2c_test);
 }
 
+/**
+ * @brief 
+ * 
+ */
+TaskHandle_t task_ln298_test;
+void LN298_test(void){
+
+	//LN298 init
+	ln298_init();
+	ln298_start();
+	xTaskCreate(TaskLN298, "Task LN298 Test", 512, NULL, 0x10, &task_ln298_test);
+}
+
+
 void main(void)
 {
-	//TaskHandle_t task_a;
-	
 	
 	uart_test();
 	//spi_test();
 	//pwm_test();
-	i2c_test();
+	//i2c_test();
+	//gpio_test();
+	LN298_test();
 
-	//xTaskCreate(TaskA, "Task A", 512, NULL, 0x10, &task_a);
-
-	/*timer = xTimerCreate("print_every_1000ms",(1000 / portTICK_RATE_MS), pdTRUE, (void *)0, interval_func);
+	/*timer = xTimerCreate("print_every_50ms",(50 / portTICK_RATE_MS), pdTRUE, (void *)0, interval_func);
 	if(timer != NULL)
 	{
 		xTimerStart(timer, 0);
