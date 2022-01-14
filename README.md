@@ -88,17 +88,62 @@ So, this project need U-Boot to run. In order to obtain this and the image for t
 
     ![Buildroot condiguration to have U-Boot.](./assets/U-Boot.png)
 
+6. Compile the image
 
-1. Copiar a imagem para o cartão sd através do comando dd com a imagem sdcard.img
-2. copiar o ficheiro config.txt para a partição boot
-3. copiar o ficheiro kernel8.img para a partição boot
-4. copiar o ficheiro elf com a app freeRTOS para a partição boot
-5. Para correr na rpi:
+    ```zsh
+    make -j($nproc)
+    ```
+7. Flash the SD card with the compiled image
 
+8. Change the name of u-boot.bin to kernel8.img
+
+9. UART1 configuration
+
+    This UART is used to interact with the U-Boot. To enable this UART in the **config.txt** **enable_uart=1**
+
+### Building the Cross Compiler
+
+In order to compile Neneco a cross compiler must be used. You can use the toolchain created by Buildroot when you compile the Linux image, or you can use a different compiler. 
+
+I will use the AArch64 ELF bare-metal target because I need Buildroot for other projects.
+
+Do the download in: <https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads>
+
+## How to use Neneco
+
+1. Clone the repository
+
+    ```zsh
+    git clone https://github.com/D3boker1/Neneco-FreeRTOS-over-rpi4.git
+    ```
+2. Go to the Makefile and change the CROSS_COMPILER for your compiler.
+
+3.  Go to the folder 'neneco'. Compile Neneco. 
+
+    ```zsh
+    make
+    ```
+4. Copy the neneco.elf file to the boot partition of your SD card.
+
+5. Put the card on RPI4B and power up!
+
+Now, wait until U-Boot start printing the boot process. When it appears, click in some key quickly. The U-Boot prompt should appear.
+
+Write the following commands to start running Neneco.
+
+```zsh
 dcache off
-
-fatload mmc 0 0x28000000 uart.elf
-
+fatload mmc 0 0x28000000 neneco.elf
 dcache flush
-
 bootelf 0x28000000
+```
+
+6. Depending on what you uncomment in main file, probably you have messages on UART2.
+
+## Support
+
+Use the Github Issues to report any type of issues or problems! Feel free to help me improving Neneco!
+
+Francisco Marques,
+University of Minho
+<fmarques_00@protonmail.com>
