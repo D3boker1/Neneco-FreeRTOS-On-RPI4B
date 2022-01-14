@@ -99,7 +99,7 @@ So, this project need U-Boot to run. In order to obtain this and the image for t
 
 9. UART1 configuration
 
-    This UART is used to interact with the U-Boot. To enable this UART in the **config.txt** **enable_uart=1**
+    This UART is used to interact with the U-Boot. To enable this UART in the **config.txt** write **enable_uart=1**
 
 ### Building the Cross Compiler
 
@@ -145,5 +145,7 @@ bootelf 0x28000000
 Use the Github Issues to report any type of issues or problems! Feel free to help me improving Neneco!
 
 Francisco Marques,
+
 University of Minho
+
 <fmarques_00@protonmail.com>
