@@ -86,7 +86,7 @@ So, this project need U-Boot to run. In order to obtain this and the image for t
 
 5. Select U-Boot as bootloader (Bootloaders -> U-Boot). In Board defconfig write: rpi_4
 
-    ![Buildroot condiguration to have U-Boot.](./assets/U-Boot.png)
+    ![Buildroot condiguration to have U-Boot.](https://raw.githubusercontent.com/D3boker1/Neneco-FreeRTOS-On-RPI4B/main/assets/U-Boot.png)
 
 6. Compile the image
 
