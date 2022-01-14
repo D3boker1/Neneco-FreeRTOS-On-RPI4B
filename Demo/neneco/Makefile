@@ -19,8 +19,8 @@ ASMFLAGS = -mcpu=cortex-a72
 INCLUDEPATH1 ?= ./src
 INCLUDEPATH2 ?= ../musl_libc
 INCLUDEPATH3 ?= ../mmu
-INCLUDEPATH4 ?= ../../../Source/include
-INCLUDEPATH5 ?= ../../../Source/portable/GCC/ARM_CA72_64_BIT
+INCLUDEPATH4 ?= ../../Source/include
+INCLUDEPATH5 ?= ../../Source/portable/GCC/ARM_CA72_64_BIT
 
 # From ./src
 OBJS = build/startup.o
@@ -49,7 +49,7 @@ OBJS +=build/cache.o
 OBJS +=build/memset.o
 OBJS +=build/memcpy.o
 
-# From ../../../Source/portable/GCC/ARM_CA72_64_BIT
+# From ../../Source/portable/GCC/ARM_CA72_64_BIT
 OBJS +=build/port.o
 OBJS +=build/portASM.o
 
@@ -79,16 +79,16 @@ build/%.o : ../cache/%.S
 build/%.o : ../musl_libc/%.c
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
-build/%.o : ../../../Source/%.c
+build/%.o : ../../Source/%.c
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
-build/%.o : ../../../Source/portable/GCC/ARM_CA72_64_BIT/%.c
+build/%.o : ../../Source/portable/GCC/ARM_CA72_64_BIT/%.c
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
-build/%.o : ../../../Source/portable/GCC/ARM_CA72_64_BIT/%.S
+build/%.o : ../../Source/portable/GCC/ARM_CA72_64_BIT/%.S
 	$(CROSS)as $(ASMFLAGS) -c -o $@ $<
 
-build/%.o : ../../../Source/portable/MemMang/%.c
+build/%.o : ../../Source/portable/MemMang/%.c
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
 clean :
