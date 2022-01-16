@@ -71,8 +71,8 @@ uint8_t ln298_set_dir(LN298_DIR_t dirx){
     switch (dirx)
     {
     case STOP:
-        gpio_pin_set(LN298_control.DIR1_PIN, GPIO_PIN_CLEAR);
-        gpio_pin_set(LN298_control.DIR2_PIN, GPIO_PIN_CLEAR);
+        gpio_pin_set(LN298_control.DIR1_PIN, GPIO_PIN_SET);
+        gpio_pin_set(LN298_control.DIR2_PIN, GPIO_PIN_SET);
         break;
     case RIGHT:
         gpio_pin_set(LN298_control.DIR1_PIN, GPIO_PIN_SET);

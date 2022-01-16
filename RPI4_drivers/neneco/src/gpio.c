@@ -138,32 +138,32 @@ int gpio_pin_isr_init(GPIO_pin_t pin, GPIO_event_t event_type){
     switch (event_type)
     {
         case GPREN:
-            *GPRENx[offset] = 0;
+            //*GPRENx[offset] = 0;
             *GPRENx[offset] |= (1 << shift_value); 
         break;
 
         case GPFEN:
-            *GPFENx[offset] = 0;
+            //*GPFENx[offset] = 0;
             *GPFENx[offset] |= (1 << shift_value); 
         break;
 
         case GPHEN:
-            *GPHENx[offset] = 0;
+            //*GPHENx[offset] = 0;
             *GPHENx[offset] |= (1 << shift_value); 
         break;
 
         case GPLEN:
-            *GPLENx[offset] = 0;
+            //*GPLENx[offset] = 0;
             *GPLENx[offset] |= (1 << shift_value); 
         break;
 
         case GPAREN:
-            *GPARENx[offset] = 0;
+            //*GPARENx[offset] = 0;
             *GPARENx[offset] |= (1 << shift_value); 
         break;
 
         case GPAFEN:
-            *GPAFENx[offset] = 0;
+            //*GPAFENx[offset] = 0;
             *GPAFENx[offset] |= (1 << shift_value); 
         break;
 
@@ -181,12 +181,19 @@ int gpio_pin_isr_init(GPIO_pin_t pin, GPIO_event_t event_type){
  */
 static void gpio_isr(void){
 
-    /**<Test in pin 21.*/
-
-    if((*GPEDSx[0] >> 21) & 0x01){
-        *GPEDSx[0] |= (1 << 21);
-        encoder_counter++;
+    if((*GPEDSx[0] >> 25) & 0x01){
+        *GPEDSx[0] |= (1 << 25);
+        currentGearSwitchValue = GEAR_R;
     }
+    else if((*GPEDSx[0] >> 8) & 0x01){
+        *GPEDSx[0] |= (1 << 8);
+        currentGearSwitchValue = GEAR_P;
+    }
+    else if((*GPEDSx[0] >> 7) & 0x01){
+        *GPEDSx[0] |= (1 << 7);
+        currentGearSwitchValue = GEAR_D;
+    }
+    xSemaphoreGiveFromISR(gearSem, NULL);
 }
 
 /*

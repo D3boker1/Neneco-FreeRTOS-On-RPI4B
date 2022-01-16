@@ -19,6 +19,9 @@
 
 #define UART_PRIORITY (0xA0)
 
+uint32_t uart_puts_isr(uint8_t *buf);
+void uart_putchar_isr(uint8_t c);
+
 /**
  * @brief Write a character on UART
  * 

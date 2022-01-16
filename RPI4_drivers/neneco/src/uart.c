@@ -19,6 +19,19 @@
 #include "interrupt.h"
 #include "semphr.h"
 #include "uart.h"
+#include "gpio.h"
+#include "fifo.h"
+
+/**
+ * @brief Type of structure for Tx buffer
+ * 
+ * The available options are the fifo module created by Francisco Marques
+ * or the messages queue provided by FreeRTOS port.
+ */
+
+//#define USE_TX_FIFO
+#define USE_TX_QUEUE
+
 
 /**< PL011 UART on Raspberry pi 4B */
 #define UART_BASE  (0xFE201400U) /* UART2 */
@@ -30,7 +43,11 @@
 #define UART_CR   (*(volatile unsigned int *)(UART_BASE+0x30U))
 #define UART_IFLS (*(volatile unsigned int *)(UART_BASE+0x34U))
 #define UART_IMSC (*(volatile unsigned int *)(UART_BASE+0x38U))
+#define UART_MIS  (*(volatile unsigned int *)(UART_BASE+0x40U))
 #define UART_ICR  (*(volatile unsigned int *)(UART_BASE+0x44U))
+#define UART_DMARC  (*(volatile unsigned int *)(UART_BASE+0x48U))
+#define UART_ITOP  (*(volatile unsigned int *)(UART_BASE+0x88U))
+
 
 /**< GPIO */
 #define GPIO_BASE (0xFE200000U)
@@ -39,16 +56,113 @@
 
 #define MAX 100
 
+#define TX 32
+
 struct UARTCTL {
 	SemaphoreHandle_t tx_mux;
 	QueueHandle_t     rx_queue;
+	/*#if defined(USE_TX_QUEUE)
+	QueueHandle_t     tx_queue;
+	#elif defined(USE_TX_FIFO)
+	fifo_t tx_fifo;
+	uint8_t tx_queue[TX];
+	#endif*/
 };
 struct UARTCTL *uartctl;
+
+/*
+void triggerTxSent(){
+	int16_t c;
+	
+	if(!(UART_IMSC & (0x1U << 5))){
+
+		#if defined(USE_TX_QUEUE)
+		if (xQueueReceive(uartctl->tx_queue, &c, (portTickType) portMAX_DELAY) == pdPASS)
+		{
+			xSemaphoreTake(uartctl->tx_mux, (portTickType) portMAX_DELAY);
+			while ( UART_FR & ( 1 << 5) ) { }
+			UART_DR = (uint8_t)0xFF & c;
+			asm volatile ("isb");
+			UART_IMSC |= ((0x1U << 5));
+			UART_ITOP |= (1<<9);
+			gpio_pin_set(GPIO_42, GPIO_PIN_SET);
+    		asm volatile ("isb");
+			xSemaphoreGive(uartctl->tx_mux);
+		}
+		#elif defined(USE_TX_FIFO)
+
+		c = fifo_get_char(&uartctl->tx_fifo);
+		
+		if(c != -ENODATA){
+			xSemaphoreTake(uartctl->tx_mux, (portTickType) portMAX_DELAY);
+			while ( UART_FR & (1 << 5) ) { }
+			UART_DR = (uint8_t)0xFF & c;
+    		asm volatile ("isb");
+			xSemaphoreGive(uartctl->tx_mux);
+			UART_IMSC |= (0x1U << 5);
+		}
+
+		#endif
+	}
+
+}
+
+void uart_putchar_isr(uint8_t c)
+{
+
+	#if defined(USE_TX_QUEUE)
+
+	uint32_t num = uxQueueMessagesWaiting(uartctl->tx_queue);
+	if(num <= 16){
+		if (xQueueSendToBack(uartctl->tx_queue, &c, (portTickType) portMAX_DELAY) == pdPASS){
+			triggerTxSent();
+		}
+	}
+
+	#elif defined(USE_TX_FIFO)
+
+	xSemaphoreTake(uartctl->tx_mux, (portTickType) portMAX_DELAY);
+	if (fifo_put_char(&uartctl->tx_fifo, c) != -ENOBUFS){
+		triggerTxSent();
+	}
+	xSemaphoreGive(uartctl->tx_mux);
+	
+	#endif
+	
+}
+
+uint32_t uart_puts_isr(uint8_t *buf)
+{
+	uint32_t i = 0;
+
+	#if defined(USE_TX_QUEUE)
+	uint32_t num = TX - uxQueueMessagesWaiting(uartctl->tx_queue);
+
+	while(buf[i] != '\0' && num != 0){
+		if (xQueueSendToBack(uartctl->tx_queue, &buf[i], (portTickType) portMAX_DELAY) == pdPASS){
+			i++;
+		}
+	}
+	triggerTxSent();
+	#elif defined(USE_TX_FIFO)
+	xSemaphoreTake(uartctl->tx_mux, (portTickType) portMAX_DELAY);
+	while(buf[i] != '\0'){
+		if (fifo_put_char(&uartctl->tx_fifo, buf[i]) != -ENOBUFS){
+			i++;
+		}
+	}
+	xSemaphoreGive(uartctl->tx_mux);
+	triggerTxSent();
+	
+	#endif
+
+	return i;
+}*/
 
 void uart_putchar(uint8_t c)
 {
 	xSemaphoreTake(uartctl->tx_mux, (portTickType) portMAX_DELAY);
-	/* wait until tx becomes idle. */
+
 	while ( UART_FR & (0x20) ) { }
 	UART_DR = c;
     asm volatile ("isb");
@@ -56,15 +170,6 @@ void uart_putchar(uint8_t c)
 }
 /*-----------------------------------------------------------*/
 
-void uart_putchar_isr(uint8_t c)
-{
-	xSemaphoreTakeFromISR(uartctl->tx_mux, NULL);
-	/* wait mini uart for tx idle. */
-	while ( (UART_FR & 0x20) ) { }
-	UART_DR = c;
-    asm volatile ("isb");
-	xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
-}
 /*-----------------------------------------------------------*/
 
 void uart_puts(const char* str)
@@ -72,54 +177,13 @@ void uart_puts(const char* str)
 	for (size_t i = 0; str[i] != '\0'; i ++)
 		uart_putchar((uint8_t)str[i]);
 }
-/*-----------------------------------------------------------*/
+/*----------------------------------------------------------*/
 
 void uart_puthex(uint64_t v)
 {
 	const char *hexdigits = "0123456789ABCDEF";
 	for (int i = 60; i >= 0; i -= 4)
 		uart_putchar(hexdigits[(v >> i) & 0xf]);
-}
-
-static char which_num(uint8_t num){
-    char send = '\0';
-    switch (num)
-		{
-		case 0:
-			send = '0';
-			break;
-		case 1:
-			send = '1';
-			break;
-		case 2:
-			send = '2';
-			break;
-		case 3:
-			send = '3';
-			break;
-		case 4:
-			send = '4';
-			break;
-		case 5:
-			send = '5';
-			break;
-		case 6:
-			send = '6';
-			break;
-		case 7:
-			send = '7';
-			break;
-		case 8:
-			send = '8';
-			break;
-		case 9:
-			send = '9';
-			break;
-		default:
-			break;
-		}
-    
-    return send;
 }
 
 static uint8_t how_long(uint64_t num){
@@ -157,7 +221,7 @@ void uart_putdec(float num)
     for(int i = 0; i < count_int; i++)
     {
         next_num_to_print = integer_part % 10;
-		num_print = which_num(next_num_to_print);
+		num_print = next_num_to_print+0x30;
         final_num[(count_int-1)-i] = num_print;
         integer_part = integer_part / 10;
     }
@@ -169,7 +233,7 @@ void uart_putdec(float num)
         for(int i = 0; i < count_frac; i++)
         {
             next_num_to_print = fractional_part % 10;
-            num_print = which_num(next_num_to_print);
+            num_print = next_num_to_print+0x30;
             final_num[(count_int + count_frac)-i] = num_print;
             fractional_part = fractional_part / 10;
         }
@@ -207,11 +271,61 @@ uint32_t uart_read_bytes(uint8_t *buf, uint32_t length)
 */
 void uart_isr(void)
 {
+	uint8_t c;
+	
+	UART_ICR = UART_MIS;
+	gpio_pin_set(GPIO_42, GPIO_PIN_SET);
+
 	/* RX data */
 	if( !(UART_FR & (0x1U << 4)) ) {
-		uint8_t c = (uint8_t) 0xFF & UART_DR;
+		c = (uint8_t) 0xFF & UART_DR;
 		xQueueSendToBackFromISR(uartctl->rx_queue, &c, NULL);
 	}
+	/* TX data */
+	
+	/*if( !(UART_FR & (0x1U << 5)) ) {
+
+		#if defined(USE_TX_QUEUE)
+
+		uint32_t num = uxQueueMessagesWaitingFromISR(uartctl->tx_queue);
+
+		if( num > 0){
+			xQueueReceiveFromISR(uartctl->tx_queue, &c, NULL);
+			xSemaphoreTakeFromISR(uartctl->tx_mux, NULL);
+			while ( UART_FR & (1 << 5) ) { }
+			UART_DR = (uint8_t)0xFF & c;
+    		asm volatile ("isb");
+			xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
+			gpio_pin_set(GPIO_42, GPIO_PIN_SET^gpio_pin_read(GPIO_42));
+			
+		}
+		else{
+			UART_IMSC &= ~(0x1U << 5);
+			asm volatile ("isb");
+			//gpio_pin_set(GPIO_42, GPIO_PIN_SET^gpio_pin_read(GPIO_42));
+		}
+
+		#elif defined(USE_TX_FIFO)
+
+		xSemaphoreTakeFromISR(uartctl->tx_mux, NULL);
+		c = fifo_get_char(&uartctl->tx_fifo);
+		xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
+
+		if( c != ENODATA){
+			xSemaphoreTakeFromISR(uartctl->tx_mux, NULL);
+			while ( UART_FR & (0x20) ) { }
+			UART_DR = (uint8_t)0xFF & c;
+    		asm volatile ("isb");
+			xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
+			gpio_pin_set(GPIO_42, GPIO_PIN_SET^gpio_pin_read(GPIO_42));
+		}
+		else{
+			UART_IMSC &= ~(0x1U << 5);
+			asm volatile ("isb");
+		}
+
+		#endif
+	}*/
 }
 /*-----------------------------------------------------------*/
 
@@ -237,14 +351,21 @@ void uart_init(void)
     UART_ICR  = 0x7FFU;         /* Clears an interrupt */
     UART_IBRD = 0x1AU;          /* 115200 baud */
     UART_FBRD = 0x3U;
-    UART_LCRH = ((0x3U << 5) | (0x0U << 4));    /* 8/n/1, FIFO disabled */
+    UART_LCRH = ((0x3U << 5) | (0x1U << 4));    /* 8/n/1, FIFO disabled */
     UART_IMSC = (0x1U << 4);    /* RX interrupt enabled */
     UART_CR   = 0x301;          /* Enables Tx, Rx and UART */
+	UART_DMARC = (1 << 1);
     asm volatile ("isb");
 
 	uartctl = pvPortMalloc(sizeof (struct UARTCTL));
 	uartctl->tx_mux = xSemaphoreCreateMutex();
 	uartctl->rx_queue = xQueueCreate(16, sizeof (uint8_t));
+
+	/*#if defined(USE_TX_QUEUE)
+	uartctl->tx_queue = xQueueCreate(TX, sizeof (uint8_t));
+	#elif defined(USE_TX_FIFO)
+	init_fifo(&uartctl->tx_fifo, uartctl->tx_queue, TX);
+	#endif	*/
 
 /*#if defined(__LINUX__)
 	uart_puts("\r\nWaiting until Linux starts booting up ...\r\n");

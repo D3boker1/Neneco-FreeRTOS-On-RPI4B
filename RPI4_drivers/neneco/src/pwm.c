@@ -58,7 +58,7 @@ uint8_t pwm_set_range(uint32_t range){
     */
 uint8_t pwm_set_dt(uint32_t duty_cycle){  
     PWM_DAT1 = duty_cycle;
-     asm volatile ("isb");
+     //asm volatile ("isb");
 
     return VALID;
 

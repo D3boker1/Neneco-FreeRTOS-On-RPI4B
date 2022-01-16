@@ -16,8 +16,7 @@
 #include <stddef.h>
 #include "board.h"
 #include "interrupt.h"
-
-int encoder_counter;
+#include "gearSwitch.h"
 
 /**< GPIO base registor*/
 #define GPIO_BASE_REG 0xFE200000U
