@@ -42,13 +42,17 @@ To build this demo you need:
 * 3 LED (or the LN298 motor driver itself)
 * 3 potentiometers (accelerator, brake and steering wheel)
 
-If you are using a breadboard, use 2 capacitors in the voltage supplie.
+Use capacitors in the voltage supplie.
 
 #### Connections
 
 See the connections in the Figure bellow.
 
 ![Connection Layout](./assets/demo_connection_bb.png "Demo hardware conncetion layout")
+
+Photo of the real hardware connection for testing.
+
+![Real Connection Layout](./assets/real-hardware.jpg "Demo real hardware conncetion layout")
 
 ### Software
 
@@ -69,6 +73,7 @@ See the connections in the Figure bellow.
     ```zsh
     make
     ```
+    
 4. Copy the neneco.elf file to the boot partition of your SD card.
 
 5. Put the card on RPI4B and power up!
