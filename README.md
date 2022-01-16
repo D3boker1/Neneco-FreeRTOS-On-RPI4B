@@ -1,6 +1,6 @@
 # Neneco
 
-    > Version: Neneco - 1 Tomoe Sharingan (0.1)
+    > Version: Neneco - 1 Tomoe Sharingan (v0.1)
 
 Neneco project is an unofficial port of FreeRTOS for Raspberry Pi 4 Model B.
 Neneco provide an abstraction layer in order to make the development of programs on RPI4B with FreeRTOS as easy as possible. This project began when the main developer needed to create a program with real time requirements and as constrains the RPI4B board.
@@ -43,7 +43,7 @@ Neneco implements some drivers for board comonly used in projects. For now, nene
 ## Organization
 Neneco is divided into two folders: FreeRTOS_port and RPI4_drivers.
 
-The FreeRTOS_port contains all the necessary files for the raw FreeRTOS port. Thank you [eggman](https://github.com/eggman/FreeRTOS-raspi3) and [TImada](https://github.com/TImada/raspi4_freertos)for the amazing job!
+The FreeRTOS_port contains all the necessary files for the raw FreeRTOS port. Thank you [eggman](https://github.com/eggman/FreeRTOS-raspi3) and [TImada](https://github.com/TImada/raspi4_freertos) for the amazing job!
 
 The RPI_drivers contains the drivers to give support to RPI4B, contains the main application as well, but the location of main application can be changed.
 
@@ -139,6 +139,10 @@ bootelf 0x28000000
 ```
 
 6. Depending on what you uncomment in main file, probably you have messages on UART2.
+
+## Demo
+
+You can see the Neneco demo in [demo brach](https://github.com/D3boker1/Neneco-FreeRTOS-On-RPI4B/tree/demo)
 
 ## Support
 
