@@ -1,124 +1,70 @@
-# Neneco
+# Neneco Demo
 
-    > Version: Neneco - 1 Tomoe Sharingan (0.1)
+    > This demo use version: Neneco - 1 Tomoe Sharingan (v0.1)
 
-Neneco project is an unofficial port of FreeRTOS for Raspberry Pi 4 Model B.
-Neneco provide an abstraction layer in order to make the development of programs on RPI4B with FreeRTOS as easy as possible. This project began when the main developer needed to create a program with real time requirements and as constrains the RPI4B board.
+Discover more about Neneco project in: [Neneco website](https://d3boker1.github.io/Neneco-FreeRTOS-On-RPI4B/)
 
-## Why Sharingan names?
+## About the Demo
 
-As said before, Neneco emerge from the need to develop a real time application. This project it is called Susanoo (Tribute to Susanoo from Naruto and not the Japanese God). Susanoo project is a mixed criticality application on automotive sector. The goal of Susanoo is reducing the number of ECU's inside a vehicle. To achieve that, strong virtualization techniques are being used, like a hypervisor to provide spacial and temporal isolation between the critical and non-critical subsystems. Thus, Neneco is the critical subsystem of Susanoo. The main goal is developing Neneco until Mangekyō Sharingan, the only sharingan able to invoke Susanoo.
-    
-## Available Drivers
+This demo implements the version beta of Susanoo critical subsystem. The purpose is to test, in an integrated environment, the accelerator, brake, steering wheel, engine control and gear switch ECU's emulation.
 
-On currently version the supported drivers are:
+To achive that the accelerator, brake and gear switch must interact with the engine control ECU. Once there is no actuator for the steering wheel the read value is printed on UART2.
+
+## Drivers used in this demo
 
 -  [X] GPIO
 -  [X] GCI-400 (Interrupt controller) 
--  [ ] UART
-
-    The driver only implements UART2. In further versions will be added suport to all UART's.
--  [ ] I2C
-
-    The driver only implements I²C device 1. In further versions will be added suport to all I²C devices.
--  [ ] SPI
-
-    The driver only implements SPI device 0. In further versions will be added suport to all SPI devices.
--  [ ] PWM
-
-    The driver only implements PWM device 0 channel 1. In further versions will be added suport to all PWM's and channels.
--  [ ] GPIO Clock Manager
-
-    The driver only implements PWM clock. In further versions will be added suport to all clocks.
-    
-### Extra
-Neneco implements some drivers for board comonly used in projects. For now, neneco give support to:
+-  [X] UART
+-  [X] I2C
+-  [X] PWM
+-  [X] GPIO Clock Manager
 -  [X] ADS1115 
-
-    A four ADC channel to I²C.
 -  [X] L298N 
 
-    A dual H-Bridge motor driver which allows speed and direction control of two DC motors at the same time.
-
-## Organization
-Neneco is divided into two folders: FreeRTOS_port and RPI4_drivers.
-
-The FreeRTOS_port contains all the necessary files for the raw FreeRTOS port. Thank you [eggman](https://github.com/eggman/FreeRTOS-raspi3) and [TImada](https://github.com/TImada/raspi4_freertos)for the amazing job!
-
-The RPI_drivers contains the drivers to give support to RPI4B, contains the main application as well, but the location of main application can be changed.
-
-### Main application
-
-The available main file, always provide a complete test over the implemented drivers. Thus, the version  **1 Tomoe Sharingan** provide a complete test over the drivers specified above.
-To test a specific driver, the only thing to do is uncomment the driver function on main function. But this is covered later.
+## 
 
 ## Pre-requisites
 
-To be able to compile and use Neneco project, some tools are needed. The approach explained here is not unique! But it is, probably, the easier one.
+To be able to compile and use this demo first you need to follow the generic Neneco [Pre-requisites](https://github.com/D3boker1/Neneco-FreeRTOS-On-RPI4B/tree/main).
 
-### Building a Default Image.
+## Building and running the Demo
 
-So, this project need U-Boot to run. In order to obtain this and the image for the RPI4B [Buildroot](https://buildroot.org/) will be used.
+### Hardware
 
-1. Install Buildroot
+#### Tools
+To build this demo you need:
 
-    ```zsh
-    git clone https://github.com/buildroot/buildroot.git
-    ```
+* Raspberry Pi 4 Model B
+* ADS1115
+* FTDI (one or two)
 
-2. Default configuration list
+    If you use the same FTDI for start and run the demo please be careful to not demage your RPIB. I recomend two FTDI, in order to not change the connections on RPI during execution.
+* 3 LED (or the LN298 motor driver itself)
+* 3 potentiometers (accelerator, brake and steering wheel)
 
-    ```zsh
-    make list-defconfigs
-    ```
+If you are using a breadboard, use 2 capacitors in the voltage supplie.
 
-3. Select a default configuration for RPI4B 64 bit
+#### Connections
 
-    ```zsh
-    make raspberrypi4_64_defconfig
-    ```
+See the connections in the Figure bellow.
 
-4. Open the menu for further modifications
+![Connection Layout](./assets/demo_connection_bb.png "Demo hardware conncetion layout")
 
-    ```zsh
-    make menuconfig
-    ```
+### Software
 
-5. Select U-Boot as bootloader (Bootloaders -> U-Boot). In Board defconfig write: rpi_4
-
-    ![Buildroot condiguration to have U-Boot.](./assets/U-Boot.png)
-
-6. Compile the image
+1. Clone the demo branch
 
     ```zsh
-    make -j($nproc)
+    git clone --branch demo https://github.com/D3boker1/Neneco-FreeRTOS-On-RPI4B.git
     ```
-7. Flash the SD card with the compiled image
 
-8. Change the name of u-boot.bin to kernel8.img
-
-9. UART1 configuration
-
-    This UART is used to interact with the U-Boot. To enable this UART in the **config.txt** write **enable_uart=1**
-
-### Building the Cross Compiler
-
-In order to compile Neneco a cross compiler must be used. You can use the toolchain created by Buildroot when you compile the Linux image, or you can use a different compiler. 
-
-I will use the AArch64 ELF bare-metal target because I need Buildroot for other projects.
-
-Do the download in: <https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads>
-
-## How to use Neneco
-
-1. Clone the repository
+2. Go to neneco folder
 
     ```zsh
-    git clone https://github.com/D3boker1/Neneco-FreeRTOS-over-rpi4.git
+    cd <your-path-here>/FreeRTOS_over_rpi/RPI4_drivers/neneco
     ```
-2. Go to the Makefile and change the CROSS_COMPILER for your compiler.
 
-3.  Go to the folder 'neneco'. Compile Neneco. 
+3.   Compile the Demo. 
 
     ```zsh
     make
@@ -138,7 +84,7 @@ dcache flush
 bootelf 0x28000000
 ```
 
-6. Depending on what you uncomment in main file, probably you have messages on UART2.
+6. You can now use the demo.
 
 ## Support
 
