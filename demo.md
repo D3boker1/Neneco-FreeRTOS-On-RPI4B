@@ -2,7 +2,6 @@
 
     > This demo use version: Neneco - 1 Tomoe Sharingan (v0.1)
 
-Discover more about Neneco project in: [Neneco website](https://d3boker1.github.io/Neneco-FreeRTOS-On-RPI4B/)
 
 ## About the Demo
 

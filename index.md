@@ -1,6 +1,6 @@
 # Neneco
 
-    > Version: Neneco - 1 Tomoe Sharingan (0.1)
+    > Version: Neneco - 1 Tomoe Sharingan (v0.1)
 
 Neneco project is an unofficial port of FreeRTOS for Raspberry Pi 4 Model B.
 Neneco provide an abstraction layer in order to make the development of programs on RPI4B with FreeRTOS as easy as possible. This project began when the main developer needed to create a program with real time requirements and as constrains the RPI4B board.
