@@ -379,7 +379,7 @@ void interval_test(void){
 
 void main(void)
 {
-	/**< Uncomment the folling line to test the desire driver.*/
+	/**< Uncomment the folling line to test the desire device driver.*/
 	uart_test();
 	//spi_test();
 	//pwm_test();

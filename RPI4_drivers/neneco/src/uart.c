@@ -233,6 +233,7 @@ void uart_init(void)
     gpio_pin_init(GPIO_0, ALT4, GPIO_PIN_PULL_NON);
     gpio_pin_init(GPIO_1, ALT4, GPIO_PIN_PULL_NON);
 
+	/**< To be changed in future version to a more clean code like GPIO driver*/
 	/* PL011 settings with assumption of 48MHz clock */
     UART_ICR  = 0x7FFU;         /* Clears an interrupt */
     UART_IBRD = 0x1AU;          /* 115200 baud */
@@ -246,6 +247,7 @@ void uart_init(void)
 	uartctl->tx_mux = xSemaphoreCreateMutex();
 	uartctl->rx_queue = xQueueCreate(16, sizeof (uint8_t));
 
+/**< Function used by eggman in his implementation*/
 /*#if defined(__LINUX__)
 	uart_puts("\r\nWaiting until Linux starts booting up ...\r\n");
 	wait_linux();
