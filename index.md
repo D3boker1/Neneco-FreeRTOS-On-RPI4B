@@ -154,7 +154,7 @@ bootelf 0x28000000
 
 ## Demo
 
-You can see the Neneco demo in [demo brach](https://github.com/D3boker1/Neneco-FreeRTOS-On-RPI4B/tree/demo)
+You can see the Neneco demo in [demo page](./demo)
 
 ## Documentation
 
