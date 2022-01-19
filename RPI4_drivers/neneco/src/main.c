@@ -60,7 +60,7 @@ static inline void io_halt(void)
 
 int16_t computeAngle(float voltage){
 	/**< 360 degrees / max voltage = line inclination (m)*/
-	return ( ((360/3.28)*voltage) - 180 );
+	return ( ((360/3.24)*voltage) - 180 );
 }
 
 void TasksteeringWheel(void *pvParameters){
@@ -72,15 +72,16 @@ void TasksteeringWheel(void *pvParameters){
         {
 			int16_t adc0;
 			float volts0;
-			int16_t angle;
+			//int16_t angle;
 
 			adc0 = readADC_SingleEnded(steeringWheel_Channel);
 			volts0 = computeVolts(adc0);
-			angle = computeAngle(volts0);
+			//angle = computeAngle(volts0);
 
-			uart_puts("Steering Wheel angle: ");
-			uart_putdec(angle);
-			uart_puts("\r\n");
+			uart_puts("SW: ");
+			uart_putdec(volts0);
+			uart_puts("?");
+			//uart_puts("\r\n");
 
 			/**< Wait 50 ms*/
 			//vTaskDelay(100 / portTICK_RATE_MS);
@@ -120,9 +121,12 @@ void TaskAccelerator(void *pvParameters){
 
 			xSemaphoreGive(semOne);
 
-			//uart_puts("Accelerator value: ");
-			//uart_putdec(percentage);
-			//uart_puts("2\r\n");
+			uart_puts("A: ");
+			uart_putdec(accelerator_percentage);
+			uart_puts("?");
+			uart_puts("B: ");
+			uart_putdec(break_percentage);
+			uart_puts("?");
 			
 			/**< Wait 50 ms*/
 			//vTaskDelay(50 / portTICK_RATE_MS);

@@ -228,7 +228,7 @@ void uart_putdec(float num)
     
     
     if(fractional_part > 0){
-        final_num[count_int] = ',';
+        final_num[count_int] = '.';
         count_frac = how_long(fractional_part);
         for(int i = 0; i < count_frac; i++)
         {
@@ -349,8 +349,8 @@ void uart_init(void)
 
 	/* PL011 settings with assumption of 48MHz clock */
     UART_ICR  = 0x7FFU;         /* Clears an interrupt */
-    UART_IBRD = 0x1AU;          /* 115200 baud */
-    UART_FBRD = 0x3U;
+    UART_IBRD = 0x4EU;          /* 115200 baud */
+    UART_FBRD = 0xDU;
     UART_LCRH = ((0x3U << 5) | (0x1U << 4));    /* 8/n/1, FIFO disabled */
     UART_IMSC = (0x1U << 4);    /* RX interrupt enabled */
     UART_CR   = 0x301;          /* Enables Tx, Rx and UART */
