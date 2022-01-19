@@ -40,10 +40,22 @@ Neneco implements some drivers for board comonly used in projects. For now, nene
 
     A dual H-Bridge motor driver which allows speed and direction control of two DC motors at the same time.
 
+### To-Do List
+The to-do list is in order by priority.
+
+-   [O] Implement a ELM327 driver; (**In Progress**)
+-   [O] Implement a buil-in interpreter; (**In Progress**)
+-   [ ] Implement a shared memory module (to give support to communication between guest in multi-guest implementations);
+-   [ ] Scale the UART driver to all UART devices;
+-   [ ] Scale the I2C driver to all I2C devices;
+-   [ ] Scale the SPI driver to all SPI devices;
+-   [ ] Scale the GPIO Clock Manager driver to all GPIO Clock devices;
+-   [ ] Scale the PWM driver to all PWM devices;
+
 ## Organization
 Neneco is divided into two folders: FreeRTOS_port and RPI4_drivers.
 
-The FreeRTOS_port contains all the necessary files for the raw FreeRTOS port. Thank you [eggman](https://github.com/eggman/FreeRTOS-raspi3) and [TImada](https://github.com/TImada/raspi4_freertos)for the amazing job!
+The FreeRTOS_port contains all the necessary files for the raw FreeRTOS port. Thank you [eggman](https://github.com/eggman/FreeRTOS-raspi3) for the amazing job!
 
 The RPI_drivers contains the drivers to give support to RPI4B, contains the main application as well, but the location of main application can be changed.
 
@@ -86,7 +98,7 @@ So, this project need U-Boot to run. In order to obtain this and the image for t
 
 5. Select U-Boot as bootloader (Bootloaders -> U-Boot). In Board defconfig write: rpi_4
 
-    ![Buildroot condiguration to have U-Boot.](/assets/U-Boot.png)
+    ![Buildroot condiguration to have U-Boot.](./assets/U-Boot.png)
 
 6. Compile the image
 
@@ -142,7 +154,12 @@ bootelf 0x28000000
 
 ## Demo
 
-You can see Neneco demo at [demo page](./demo.md).
+You can see the Neneco demo in [demo brach](https://github.com/D3boker1/Neneco-FreeRTOS-On-RPI4B/tree/demo)
+
+## Documentation
+
+This project is being documented at the same time as it is being developed. However, some drivers are not documented yet, and it is not the most priority task at the moment.
+
 ## Support
 
 Use the Github Issues to report any type of issues or problems! Feel free to help me improving Neneco!
