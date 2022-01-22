@@ -154,8 +154,10 @@ int16_t spi_receive_data_poll(void){
 }*/
 
 //uint8_t spi_init(SPI_t spix, SPICS_t csx, SPICPOL_t cpolx, SPICPHA_t cphax){
-uint8_t spi_init(SPICS_t csx, SPICPOL_t cpolx, SPICPHA_t cphax){    
-    //Initialize the SPI control structure
+uint8_t spi_init(SPICS_t csx, SPICPOL_t cpolx, SPICPHA_t cphax){
+    uint8_t ret = ENOSYS;
+
+    /**<Initialize the SPI control structure*/
     spicontrol.tx_mux = xSemaphoreCreateMutex();
 	//spicontrol.tx_queue = xQueueCreate(MAX_LEN, sizeof (uint8_t));
     spicontrol.rx_mux = xSemaphoreCreateMutex();
@@ -181,7 +183,8 @@ uint8_t spi_init(SPICS_t csx, SPICPOL_t cpolx, SPICPHA_t cphax){
     //Initialize the spi interrupt
     //SPI_CS |= ((1 << INTR) | (1 << INTD));
     //isr_register(IRQ_SPI, SPI_PRIORITY, (0x1U << 0x3U), spi_isr_handler);
+    ret = VALID;
 
-    return VALID;
+    return ret;
 
 }

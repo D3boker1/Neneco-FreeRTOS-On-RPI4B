@@ -38,6 +38,7 @@
 #define GPIO_PUP_PDN_CNTRL_REG0 (*(volatile unsigned int *)(GPIO_BASE+0xE4U))
 
 #define MAX 100
+#define ASCII_OFFSET 0x30
 
 struct UARTCTL {
 	SemaphoreHandle_t tx_mux;
@@ -56,17 +57,6 @@ void uart_putchar(uint8_t c)
 }
 /*-----------------------------------------------------------*/
 
-void uart_putchar_isr(uint8_t c)
-{
-	xSemaphoreTakeFromISR(uartctl->tx_mux, NULL);
-	/* wait mini uart for tx idle. */
-	while ( (UART_FR & 0x20) ) { }
-	UART_DR = c;
-    asm volatile ("isb");
-	xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
-}
-/*-----------------------------------------------------------*/
-
 void uart_puts(const char* str)
 {
 	for (size_t i = 0; str[i] != '\0'; i ++)
@@ -79,47 +69,6 @@ void uart_puthex(uint64_t v)
 	const char *hexdigits = "0123456789ABCDEF";
 	for (int i = 60; i >= 0; i -= 4)
 		uart_putchar(hexdigits[(v >> i) & 0xf]);
-}
-
-static char which_num(uint8_t num){
-    char send = '\0';
-    switch (num)
-		{
-		case 0:
-			send = '0';
-			break;
-		case 1:
-			send = '1';
-			break;
-		case 2:
-			send = '2';
-			break;
-		case 3:
-			send = '3';
-			break;
-		case 4:
-			send = '4';
-			break;
-		case 5:
-			send = '5';
-			break;
-		case 6:
-			send = '6';
-			break;
-		case 7:
-			send = '7';
-			break;
-		case 8:
-			send = '8';
-			break;
-		case 9:
-			send = '9';
-			break;
-		default:
-			break;
-		}
-    
-    return send;
 }
 
 static uint8_t how_long(uint64_t num){
@@ -157,19 +106,19 @@ void uart_putdec(float num)
     for(int i = 0; i < count_int; i++)
     {
         next_num_to_print = integer_part % 10;
-		num_print = which_num(next_num_to_print);
+		num_print = next_num_to_print + ASCII_OFFSET;
         final_num[(count_int-1)-i] = num_print;
         integer_part = integer_part / 10;
     }
     
     
     if(fractional_part > 0){
-        final_num[count_int] = ',';
+        final_num[count_int] = '.';
         count_frac = how_long(fractional_part);
         for(int i = 0; i < count_frac; i++)
         {
             next_num_to_print = fractional_part % 10;
-            num_print = which_num(next_num_to_print);
+            num_print = next_num_to_print + ASCII_OFFSET;
             final_num[(count_int + count_frac)-i] = num_print;
             fractional_part = fractional_part / 10;
         }

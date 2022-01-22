@@ -28,6 +28,7 @@
 #include "pwm.h"
 #include "AD1115.h"
 #include "LN298.h"
+#include "ELM327.h"
 
 /*
  * Prototypes for the standard FreeRTOS callback/hook functions implemented
@@ -37,6 +38,8 @@ void vApplicationMallocFailedHook( void );
 void vApplicationIdleHook( void );
 
 uint16_t dt = 0;
+
+DataELM327_t elm327_info;
 
 static inline void io_halt(void)
 {
@@ -227,6 +230,31 @@ void TaskGPIO(void *pvParameters){
 /*-----------------------------------------------------------*/
 
 /**
+ * @brief ELM327 task test
+ * 
+ * @param pvParameters 
+ * 
+ * This function will send trough uart all the supported commands for elm327 device.
+ * Beteween commands a delay of 50 ms exist. 
+ */
+void TaskcanBusSender(void *pvParameters){
+
+	(void) pvParameters;
+
+    for( ;; )
+    {
+		uart_puts("Command sent: ");
+		elm327_execute_next(&elm327_info);
+		uart_puts("\r\n");
+
+		/**< Wait 50 ms*/
+		vTaskDelay(50 / portTICK_RATE_MS);
+		
+	}
+	return; /* Never reach this line */
+}
+
+/**
  * @brief Interval function to test the FreeRTOS timer.
  * 
  * @param pxTimer 
@@ -317,6 +345,30 @@ void spi_test(void){
 
 }
 
+
+/**
+ * @brief Dummy elm327 function test
+ * 
+ * This function initialize the elm327 module and creates a task to test it.
+ * 
+ */
+TaskHandle_t task_can_bus_sender;
+int elm327_test(void){
+	int ret = -ENOSYS;
+
+	if(elm327_data_init(&elm327_info) == VALID){
+        ret = VALID;
+    }
+	else{
+		/**< Create the task can bus sender*/
+		xTaskCreate(TaskcanBusSender, "Task canBusSender", 512, NULL, 6, &task_can_bus_sender);
+
+	}
+
+	return ret;
+	
+}
+
 /**
  * @brief Dummy pwm function test
  * 
@@ -387,6 +439,7 @@ void main(void)
 	//gpio_test();
 	//interval_test();
 	//LN298_test();
+	//elm327_test();
 
 	vTaskStartScheduler();
 }

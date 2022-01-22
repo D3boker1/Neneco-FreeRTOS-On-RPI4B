@@ -21,7 +21,7 @@ void init_ADS1115() {
   m_gain = GAIN_TWOTHIRDS; /* +/- 6.144V range (limited to VDD +0.3V max!) */
   m_dataRate = RATE_ADS1115_128SPS;
 
-  init_i2c(0);
+  init_i2c(FAST_MODE_100K);
 }
 
 void writeRegister(uint8_t reg, uint16_t value) {

@@ -42,9 +42,9 @@ void set_clock_i2c (unsigned nClockSpeed);
 /**
  * @brief This function is responsible for effectively receive data through the I²C device to be sent from the I²C slave
  * 
- * @param ucAddress 
- * @param pBuffer 
- * @param nCount 
+ * @param ucAddress Slave address
+ * @param pBuffer buffer to store the received data
+ * @param nCount Number of bytes to be read
  * @return int 
  */
 int read_i2c(uint8_t ucAddress, void *pBuffer, unsigned nCount);
@@ -52,9 +52,9 @@ int read_i2c(uint8_t ucAddress, void *pBuffer, unsigned nCount);
 /**
  * @brief  This function is responsible for effectively send data to the I²C device to be sent to the I²C slave.
  * 
- * @param ucAddress 
- * @param pBuffer 
- * @param nCount 
+ * @param ucAddress Slave address
+ * @param pBuffer buffer that contains the data to be transferred
+ * @param nCount Number of bytes to be written
  * @return int 
  */
 int write_i2c(uint8_t ucAddress, const void *pBuffer, unsigned nCount);

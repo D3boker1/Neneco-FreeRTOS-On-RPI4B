@@ -86,13 +86,13 @@ typedef struct{
 
 
 /**
- * @brief 
+ * @brief Initialize the SPI device.
  * 
- * @param spix 
- * @param csx 
- * @param cpoolx 
- * @param cphax 
- * @return uint8_t 
+ * @param spix Device to be initialized
+ * @param csx Chip select to be used
+ * @param cpoolx Pool state
+ * @param cphax  Phase state
+ * @return uint8_t VALID in case of success. ENOSYS in case of failure.
  */
 //uint8_t spi_init(SPI_t spix, SPICS_t csx, SPICPOL_t cpoolx, SPICPHA_t cphax);
 uint8_t spi_init(SPICS_t csx, SPICPOL_t cpoolx, SPICPHA_t cphax);
@@ -106,10 +106,17 @@ uint8_t spi_init(SPICS_t csx, SPICPOL_t cpoolx, SPICPHA_t cphax);
 //uint8_t spi_isr_init(SPI_t spix);
 
 /**
- * @brief 
+ * @brief Insert data in a queue to be transmitted.
  * 
- * @param data 
+ * @param data Byte to be sent
  * @return uint8_t 
+ * 
+ * This function start calculating the amount of free slots on transmit queue. 
+ * If there is at least one space free, the received data is inserted in transmit queue. 
+ * To avoid race conditions the insert operation require a mutex control. 
+ * Before leave the function, the Transmit Active bit is set to active the byte transmission.
+ * In case of success the VALID macro is returned, in the other hand, 
+ * if the queue is full the macro ENOBUFS is returned.
  */
 uint8_t spi_send_data(const uint8_t data);
 

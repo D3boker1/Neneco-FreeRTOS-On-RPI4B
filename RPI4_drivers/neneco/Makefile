@@ -37,6 +37,7 @@ OBJS +=build/gpioclock.o
 OBJS +=build/i2c.o
 OBJS +=build/AD1115.o
 OBJS +=build/LN298.o
+OBJS +=build/ELM327.o
 
 
 # From ../mmu
