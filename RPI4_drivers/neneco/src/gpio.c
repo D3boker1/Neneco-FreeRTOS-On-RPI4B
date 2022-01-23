@@ -107,6 +107,10 @@ void gpio_pin_set(GPIO_pin_t pin, GPIO_set_clear_t value){
 
 }
 
+void gpio_pin_toggle(GPIO_pin_t pin){
+    gpio_pin_set(pin, gpio_pin_read(pin) ^ GPIO_PIN_SET);
+}
+
 int gpio_pin_read(GPIO_pin_t pin){
 
     int32_t ret = -1;

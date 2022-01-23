@@ -38,6 +38,7 @@ void vApplicationMallocFailedHook( void );
 void vApplicationIdleHook( void );
 
 uint16_t dt = 0;
+#define PWM_RANGE 1024
 
 DataELM327_t elm327_info;
 
@@ -60,15 +61,10 @@ void TaskUART(void *pvParameters){
 
     for( ;; )
     {
-		uart_puts("UART2 Working\r\n");
-		uart_putchar('!');
-		uart_puts("\r\n");
-		uart_putdec(13);
-		uart_puts("\r\n");
-		uart_putdec(13.13);
-		uart_puts("\r\n");
-		uart_puthex(0x13);
-		uart_puts("\r\n");
+		uint8_t read_buff;
+
+		if (uart_read_bytes(&read_buff, 1) != 0)
+			uart_putchar(read_buff);
 
 		/**< Wait 1000 ms*/
 		vTaskDelay(1000 / portTICK_RATE_MS);
@@ -217,10 +213,10 @@ void TaskGPIO(void *pvParameters){
 	(void) pvParameters;
     for( ;; )
     {
-		uart_puts("encoder value: ");
-		uart_putdec(encoder_counter);
-		uart_puts(";\r\n");
-		vTaskDelay(50 / portTICK_RATE_MS);
+		gpio_pin_toggle(GPIO_21);
+
+		/**< Waits 1 ms*/
+		vTaskDelay(1 / portTICK_RATE_MS);
     }
 
 	return; /* Never reach this line */
@@ -296,20 +292,20 @@ void interval_func(TimerHandle_t pxTimer)
 TaskHandle_t task_gpio_test;
 void gpio_test(void){
 	//gpio0 isr enable
-	if ( gpio_isr_init() != 0){
+	/*if ( gpio_isr_init() != 0){
 		uart_puts("\r\n gpio_isr_init error! \r\n");
 		while(1);
-	}
+	}*/
 	//LED on rasp
-	gpio_pin_init(GPIO_42, OUT, GPIO_PIN_PULL_UP);
+	gpio_pin_init(GPIO_21, OUT, GPIO_PIN_PULL_UP);
 	//Button
-    gpio_pin_init(GPIO_21, IN, GPIO_PIN_PULL_NON);
+    //gpio_pin_init(GPIO_21, IN, GPIO_PIN_PULL_NON);
 	xTaskCreate(TaskGPIO, "Task GPIO Test", 512, NULL, 0x10, &task_gpio_test);
 	//button interrupt enable
-	if(gpio_pin_isr_init(GPIO_21, GPHEN) != 0){
+	/*if(gpio_pin_isr_init(GPIO_21, GPHEN) != 0){
 		uart_puts("\r\n gpio__pin_isr_init error! \r\n");
 		while(1);
-	}
+	}*/
 }
 
 /**
@@ -325,9 +321,12 @@ TaskHandle_t task_uart_test;
 void uart_test(){
 	//uart2 initialization
 	uart_init();
-	xTaskCreate(TaskUART, "Task UART Test", 512, NULL, 0x10, &task_uart_test);
 
-	uart_puts("\r\n FreeRTOS over RPI4 - UART2 + LED\r\n");
+	/*uart_puts("\r\n Neneco - UART unit test\r\n");
+	uart_putdec(13);
+	uart_puthex(0x30);
+
+	xTaskCreate(TaskUART, "Task UART Test", 512, NULL, 0x10, &task_uart_test);*/
 }
 
 /**
@@ -376,10 +375,9 @@ int elm327_test(void){
  */
 TaskHandle_t task_pwm_test;
 void pwm_test(void){
-
+	uint32_t duty_cycle = (PWM_RANGE * 75) / 100 ;
 	//PWM init
-	pwm_init(1024,dt);//PWM0, PWM_CHANNEL_1, 1024, dt);
-	xTaskCreate(TaskPWM, "Task PWM Test", 512, NULL, 0x10, &task_pwm_test);
+	pwm_init(PWM_RANGE, duty_cycle);
 }
 
 TaskHandle_t task_i2c_test;
@@ -410,7 +408,9 @@ void LN298_test(void){
 	//LN298 init
 	ln298_init();
 	ln298_start();
-	xTaskCreate(TaskLN298, "Task LN298 Test", 512, NULL, 0x10, &task_ln298_test);
+	ln298_set_dir(LEFT);
+	ln298_set_velocity_per(67);
+	//xTaskCreate(TaskLN298, "Task LN298 Test", 512, NULL, 0x10, &task_ln298_test);
 }
 
 /**
@@ -432,13 +432,13 @@ void interval_test(void){
 void main(void)
 {
 	/**< Uncomment the folling line to test the desire device driver.*/
-	uart_test();
+	//uart_test();
 	//spi_test();
 	//pwm_test();
 	//i2c_test();
 	//gpio_test();
 	//interval_test();
-	//LN298_test();
+	LN298_test();
 	//elm327_test();
 
 	vTaskStartScheduler();

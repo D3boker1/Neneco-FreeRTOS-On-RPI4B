@@ -32,10 +32,10 @@ uint8_t ln298_init(void){
     /**< Pins and devices initialization*/
     gpio_pin_init(LN298_control.DIR1_PIN, OUT, GPIO_PIN_PULL_DOWN);
     gpio_pin_init(LN298_control.DIR2_PIN, OUT, GPIO_PIN_PULL_DOWN);
-    pwm_init(RANGE, 0);//LN298_control.PWM_device, LN298_control.PWM_channel, RANGE, 0);
+    pwm_init(RANGE, 0);
 
-    gpio_pin_set(LN298_control.DIR1_PIN, GPIO_PIN_CLEAR);
-    gpio_pin_set(LN298_control.DIR2_PIN, GPIO_PIN_CLEAR);
+    gpio_pin_set(LN298_control.DIR1_PIN, GPIO_PIN_SET);
+    gpio_pin_set(LN298_control.DIR2_PIN, GPIO_PIN_SET);
 
     init = 1;
 

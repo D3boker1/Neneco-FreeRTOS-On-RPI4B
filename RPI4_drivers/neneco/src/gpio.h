@@ -68,6 +68,15 @@ int gpio_pin_init(GPIO_pin_t pin, GPIO_function_t pin_func, GPIO_PULLx_t pin_pul
 void gpio_pin_set(GPIO_pin_t pin, GPIO_set_clear_t value);
 
 /**
+ * @brief Toggle on received pin
+ * 
+ * @param pin 
+ * 
+ * Change the logic level of the received pin.
+ */
+void gpio_pin_toggle(GPIO_pin_t pin);
+
+/**
  * @brief Read the pin value at any given moment
  * 
  * @param pin: pin to read
