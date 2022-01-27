@@ -39,12 +39,13 @@ Neneco implements some drivers for board comonly used in projects. For now, nene
 -  [X] L298N 
 
     A dual H-Bridge motor driver which allows speed and direction control of two DC motors at the same time.
+-  [X] Implement a ELM327 driver.
 
+    A interface to read car can bus network.
 ### To-Do List
 The to-do list is in order by priority.
 
--   [O] Implement a ELM327 driver; (**In Progress**)
--   [O] Implement a buil-in interpreter; (**In Progress**)
+-   [ ] Implement a buil-in interpreter; (**In Progress**)
 -   [ ] Implement a shared memory module (to give support to communication between guest in multi-guest implementations);
 -   [ ] Scale the UART driver to all UART devices;
 -   [ ] Scale the I2C driver to all I2C devices;
